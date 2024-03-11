@@ -41,7 +41,7 @@ func RunContainerInitProcess() error {
 const fdIndex = 3
 
 func readUserCommand() []string {
-	// uintptr(3 ）就是指 index 为3的文件描述符，也就是传递进来的管道的另一端，至于为什么是3，具体解释如下：
+	// uintptr(3) 就是指 index 为3的文件描述符，也就是传递进来的管道的另一端，至于为什么是3，具体解释如下：
 	/*	因为每个进程默认都会有3个文件描述符，分别是标准输入、标准输出、标准错误。这3个是子进程一创建的时候就会默认带着的，
 		前面通过ExtraFiles方式带过来的 readPipe 理所当然地就成为了第4个。
 		在进程中可以通过index方式读取对应的文件，比如
@@ -54,6 +54,7 @@ func readUserCommand() []string {
 		那么我们的 readPipe 就是 index6,读取时就要像这样：pipe := os.NewFile(uintptr(6), "pipe")
 	*/
 	pipe := os.NewFile(uintptr(fdIndex), "pipe")
+	defer pipe.Close()
 	msg, err := io.ReadAll(pipe)
 	if err != nil {
 		log.Errorf("init read pipe error %v", err)
